@@ -48,6 +48,17 @@ function initMyBookmarklet($) {
           items.push('<li>' + val.phrase.text + '</li>');         
         }    
       });
+      if (items.length == 0) {
+        $.each(data.tuc, function(key, val) {    
+          if (typeof(val) !== 'undefined' && typeof(val.meanings) !== 'undefined') {
+            $.each(val.meanings, function(meaningKey, meaningValue) {
+              if (typeof(meaningValue.text) != 'undefined') {
+                items.push('<li>' + meaningValue.text + '</li>');
+              }
+            }
+          }
+        }
+      });
       if(items.length == 0) {
         items.push('<li>No definitions found.</li>');
       }
