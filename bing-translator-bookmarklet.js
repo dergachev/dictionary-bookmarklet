@@ -28,20 +28,37 @@ function requireDeps() {
 
 function initMyBookmarklet($) {
   $(function(){ 
-      $(document).mouseup(function(e) {               
+      $.jGrowl('Highlight a phrase to translate it.', {header:"FR>EN bookmarklet activated"});
+      $(document).mouseup(function(e) {
           var word = window.getSelection().toString();
-          lookupDef(word);
+          lookupTranslation(word);
       });
   });
 
-
-  function lookupDef(word) {
-   // ensure selection is a single word, recognizing accents too
-   word = word.toLowerCase().split(' ')[0].replace(/[^'a-zA-Z0-9\u00E0-\u00FC-]/,'');
+  function lookupTranslation(word) { 
+    // ensure selection is a single word, recognizing accents too
     if (word.length < 2) {
       return;      
     }
-   $.getJSON('http://glosbe.com/gapi/translate?from=fra&dest=eng&format=json&callback=?&pretty=true&phrase='+word, function(data) {
+
+    // there seems to be no other way to escape quotes in YQL syntax
+    word = word.replace(/"/,"'");
+
+    var query ='select * from microsoft.translator where text="' + word + '" and from = "fr" and to = "en" and client_id="dictionary-bookmarklet-01" and client_secret="12345678901234567890"';
+    $.get("http://query.yahooapis.com/v1/public/yql", { q: query, env: "store://datatables.org/alltableswithkeys" }, function(data) {
+      var answer = $('query results',data).text();
+      $.jGrowl(answer, {header: word, life: Math.max(word.length * 50, 3000) });
+    });   
+  }
+
+  function lookupDef(word) {
+    // ensure selection is a single word, recognizing accents too
+    word = word.toLowerCase().split(' ')[0].replace(/[^'a-zA-Z0-9\u00E0-\u00FC-]/,'');
+    if (word.length < 2) {
+      return;      
+    }
+
+   $.getJSON(url, function(data) {
       var items = [];
       $.each(data.tuc, function(key, val) {    
         if ( typeof(val) !== 'undefined' && typeof(val.phrase) !== 'undefined' && typeof(val.phrase.text) !== 'undefined') {
