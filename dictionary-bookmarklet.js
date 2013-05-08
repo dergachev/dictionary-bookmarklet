@@ -55,11 +55,11 @@ function initMyBookmarklet($) {
               if (typeof(meaningValue.text) != 'undefined') {
                 items.push('<li>' + meaningValue.text + '</li>');
               }
-            }
+            });
           }
-        }
+        });
       }
-      if(items.length == 0) {
+      if (items.length == 0) {
         items.push('<li>No definitions found.</li>');
       }
       var list = $('<ul/>', {
