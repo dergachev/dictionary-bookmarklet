@@ -58,7 +58,7 @@ function initMyBookmarklet($) {
             }
           }
         }
-      });
+      }
       if(items.length == 0) {
         items.push('<li>No definitions found.</li>');
       }
