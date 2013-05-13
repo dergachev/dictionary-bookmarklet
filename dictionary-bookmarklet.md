@@ -1,4 +1,10 @@
-# Dictionary-bookmarklet Development notes
+# Dictionary-bookmarklet 
+
+## Install
+
+For info and install, see http://htmlpreview.github.io/?https://gist.github.com/dergachev/e9339d65c1bf7a6c6226/raw/index.html
+
+## Development notes
 
 Bookmarklets:
 * http://lifehacker.com/129141/geek-to-live-ten-must+have-bookmarklets
