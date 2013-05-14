@@ -107,3 +107,4 @@ Proof of concept with rangy: http://jsfiddle.net/dergachev/3kc9X/
 * http://stackoverflow.com/questions/2444430/how-to-get-a-word-under-cursor-using-javascript
 * http://dev.w3.org/csswg/cssom-view/#the-caretposition-interface
 * http://jsfiddle.net/kkgEt/2/
+* https://code.google.com/p/rangy/wiki/HighlighterModule
