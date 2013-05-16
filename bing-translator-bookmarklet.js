@@ -48,7 +48,7 @@ function initBookmarklet($) {
       lookupTranslation(selectedText, function(word,answer) {
         $('span.selected')
           .data('powertip', '<em>' + word + '</em><hr/>\n<p>' + answer + '</p>')
-          .powerTip({smartPlacement:true})
+          .powerTip({smartPlacement:true, manual:true})
           .first().powerTip('show'); // I'm not yet sure which element should be activated
       });
     }
@@ -71,7 +71,7 @@ function initBookmarklet($) {
   $(function() {
     $('body').on('mousedown', function(e) {
       // unwrap span.selected contents; via http://stackoverflow.com/q/2409117/9621
-      $('span.selected').replaceWith( function() {
+      $('span.selected').powerTip('hide', true).replaceWith( function() {
         return $(this).contents();
       });
     });
