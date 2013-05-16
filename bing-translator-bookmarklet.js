@@ -16,53 +16,70 @@ function requireDeps() {
       test: typeof(window.jQuery) === 'undefined' || jQuery.fn.jquery.match(/^1\.[0-9]+/) < 1.7,
       yep: '//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.0/jquery.min.js'
     },
-    {
-      test: typeof(window.jQuery) === 'undefined' || typeof(window.jQuery.fn.powerTip) === 'undefined',
-      //note: 1.2 version isnt on cdnjs.org yet; using gh-pages is good for no-sniff header, but this will not work on HTTPS
-      yep: ['http://stevenbenner.github.io/jquery-powertip/scripts/jquery.powertip.js','http://stevenbenner.github.io/jquery-powertip/styles/jquery.powertip.css'],
+    { test: typeof(window.rangy) === 'undefined',
+      yep: '//rangy.googlecode.com/svn/trunk/currentrelease/rangy-core.js'
+    },
+    { test: typeof(window.rangy) === 'undefined' || typeof(rangy.CssClassApplier) === 'undefined',
+      yep: '//rangy.googlecode.com/svn/trunk/currentrelease/rangy-cssclassapplier.js'
+    },
+    { test: typeof(window.jQuery) === 'undefined' || typeof(window.jQuery.fn.powerTip) === 'undefined',
+      yep: ['//cdnjs.cloudflare.com/ajax/libs/jquery-powertip/1.2.0/jquery.powertip.min.js','//cdnjs.cloudflare.com/ajax/libs/jquery-powertip/1.2.0/css/jquery.powertip-light.min.css'],
       complete: function (url, result, key) {
-        initMyBookmarklet(jQuery);
+        // XXX: due to yepnope bug, this will get called immediately if jquery.powertip.js is already present
+        initBookmarklet(jQuery);
       }
     }
   ]);
 }
 
-function initMyBookmarklet($) {
-  // call with no args to clear, o
-  // call with just _word_ to indicate we're looking up word
-  function powerTip(word,answer,event) {
-   $.powerTip.destroy();
-    if (typeof(word) === "undefined" || word == "") {
-      $(event.target).data('powertipjq', '');
-    } else if (typeof(answer) === "undefined") {
-      $(event.target).data('powertipjq', $('<p>Looking up <b>' + word + '</b>...</p>')).powerTip({followMouse:true});
-    } else {
-      $(event.target).data('powertipjq', $('<p><b>' + word + '</b></p>' + "\n" + '<p>' + answer + '</p>')).powerTip({followMouse:true});
+function initBookmarklet($) {
+  function handleSelection() { // without delay window.getSelection().isCollapsed is unreliable
+    // unwrap span.selected contents; via http://stackoverflow.com/q/2409117/9621
+    $('span.selected').replaceWith( function() {
+      return $(this).contents();
+    });
+
+    // initialize rangy, from http://stackoverflow.com/a/5765574/9621
+    rangy.init();
+    this.selectionWrapper = this.selectionWrapper || rangy.createCssClassApplier("selected", {normalize: true});
+
+    var selection = window.getSelection(),
+        selectedText = selection.toString();
+
+    // only if selection is active, and selected phrase is non-trivial
+    if (!selection.isCollapsed && selectedText.length >= 2) {
+      this.selectionWrapper.applyToSelection();
+      lookupTranslation(selectedText, function(word,answer) {
+        $('span.selected')
+          .data('powertip', '<em>' + word + '</em><hr/>\n<p>' + answer + '</p>')
+          .powerTip({smartPlacement:true})
+          .first().powerTip('show'); // I'm not yet sure which element should be activated
+      });
     }
+  }
+
+  function lookupTranslation(word, callback) {
+    // there seems to be no other way to escape quotes in YQL syntax
+    word = word.replace(/"/,"'");
+    var data = { q: 'SELECT * from microsoft.translator WHERE text="' +
+                     word + '" AND from = "fr" AND to = "en" AND ' +
+                     'client_id="dictionary-bookmarklet-01" AND client_secret="12345678901234567890"',
+                 env: "store://datatables.org/alltableswithkeys"
+    };
+    $.get("http://query.yahooapis.com/v1/public/yql", data, function(data) {
+      var answer = $('query results',data).text();
+      callback(word, answer);
+    });
   }
 
   $(function() {
-      // $.jGrowl('Highlight a phrase to translate it.', {header:"FR>EN bookmarklet activated"});
-      $(document).mouseup(function(e) {
-        var word = window.getSelection().toString();
-        powerTip(word, undefined, e);
-        lookupTranslation(word, e);
-      });
+    $('a').on('click', function(e) {
+      window.setTimeout(handleSelection, 1);
+      // make it easier to highlight link text by disabling click handlers if alt-key is held
+      if (e.altKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    })
   });
-
-  function lookupTranslation(word, event) {
-    // ensure selection is a single word, recognizing accents too
-    if (word.length < 2) {
-      return;
-    }
-    // there seems to be no other way to escape quotes in YQL syntax
-    word = word.replace(/"/,"'");
-    var query = 'SELECT * from microsoft.translator WHERE text="' + word + '" AND from = "fr" AND to = "en" AND ' +
-                 'client_id="dictionary-bookmarklet-01" AND client_secret="12345678901234567890"';
-    $.get("http://query.yahooapis.com/v1/public/yql",
-          { q: query, env: "store://datatables.org/alltableswithkeys" }, function(data) {
-      var answer = $('query results',data).text();
-      powerTip(word,answer,event);
-    });
-  }
 }
