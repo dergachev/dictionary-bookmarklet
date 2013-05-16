@@ -34,10 +34,6 @@ function requireDeps() {
 
 function initBookmarklet($) {
   function handleSelection() { // without delay window.getSelection().isCollapsed is unreliable
-    // unwrap span.selected contents; via http://stackoverflow.com/q/2409117/9621
-    $('span.selected').replaceWith( function() {
-      return $(this).contents();
-    });
 
     // initialize rangy, from http://stackoverflow.com/a/5765574/9621
     rangy.init();
@@ -73,8 +69,16 @@ function initBookmarklet($) {
   }
 
   $(function() {
+    $('body').on('mousedown', function(e) {
+      // unwrap span.selected contents; via http://stackoverflow.com/q/2409117/9621
+      $('span.selected').replaceWith( function() {
+        return $(this).contents();
+      });
+    });
     $('body').on('mouseup', function(e) { // 'mouseup' works better for dragging (eg highlighting) than 'click'
       window.setTimeout(handleSelection, 1);
+      // TODO: make alt-clicking on an element automatically translate its contents (without selection)
+      // TODO: auto-translate highlighted text on bookmarklet load
       // make it easier to highlight link text by disabling click handlers if alt-key is held
       if (e.altKey) {
         e.preventDefault();
