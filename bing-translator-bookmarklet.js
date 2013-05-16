@@ -73,7 +73,7 @@ function initBookmarklet($) {
   }
 
   $(function() {
-    $('body').on('click', function(e) {
+    $('body').on('mouseup', function(e) { // 'mouseup' works better for dragging (eg highlighting) than 'click'
       window.setTimeout(handleSelection, 1);
       // make it easier to highlight link text by disabling click handlers if alt-key is held
       if (e.altKey) {
