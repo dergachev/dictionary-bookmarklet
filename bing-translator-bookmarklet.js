@@ -73,7 +73,7 @@ function initBookmarklet($) {
   }
 
   $(function() {
-    $('a').on('click', function(e) {
+    $('body').on('click', function(e) {
       window.setTimeout(handleSelection, 1);
       // make it easier to highlight link text by disabling click handlers if alt-key is held
       if (e.altKey) {
