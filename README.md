@@ -2,7 +2,7 @@
 
 ## Install
 
-For info and install, see http://htmlpreview.github.io/?https://gist.github.com/dergachev/e9339d65c1bf7a6c6226/raw/index.html
+For info and install, see http://dergachev.github.io/dictionary-bookmarklet/
 
 ## Development notes
 
